@@ -47,7 +47,7 @@ const createRelease = async (
       prerelease: pkg.packageJson.version.includes("-"),
       ...github.context.repo,
     });
-  } catch (err: any) {
+  } catch (err) {
     // if we can't find a changelog, the user has probably disabled changelogs
     if (err.code !== "ENOENT") {
       throw err;
@@ -165,7 +165,7 @@ export async function runPublish({
 const requireChangesetsCliPkgJson = (cwd: string) => {
   try {
     return require(resolveFrom(cwd, "@changesets/cli/package.json"));
-  } catch (err: any) {
+  } catch (err) {
     if (err && err.code === "MODULE_NOT_FOUND") {
       throw new Error(
         `Have you forgotten to install \`@changesets/cli\` in "${cwd}"?`
@@ -295,7 +295,14 @@ export async function runVersion({
   let searchResultPromise = octokit.search.issuesAndPullRequests({
     q: searchQuery,
   });
+
   let changedPackages = await getChangedPackages(cwd, versionsByDirectory);
+  if (changedPackages.length === 0) {
+    return {
+      pullRequestNumber: -1,
+    };
+  }
+
   let changedPackagesInfoPromises = Promise.all(
     changedPackages.map(async (pkg) => {
       let changelogContents = await fs.readFile(
