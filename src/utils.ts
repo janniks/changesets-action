@@ -68,7 +68,7 @@ export function getChangelogEntry(changelog: string, version: string) {
       if (
         endIndex === undefined &&
         headingStartInfo !== undefined &&
-        node.depth >= headingStartInfo.depth
+        headingStartInfo.depth === node.depth
       ) {
         endIndex = i;
         break;
